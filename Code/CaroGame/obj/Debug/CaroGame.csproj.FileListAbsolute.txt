@@ -1,1 +1,9 @@
 C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\bin\Debug\CaroGame.exe.config
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\bin\Debug\CaroGame.exe
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\bin\Debug\CaroGame.pdb
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.csprojResolveAssemblyReference.cache
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.CaroGame.resources
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.Properties.Resources.resources
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.csproj.GenerateResource.Cache
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.exe
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.pdb
