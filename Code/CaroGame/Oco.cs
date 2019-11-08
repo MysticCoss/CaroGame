@@ -9,17 +9,27 @@ namespace CaroGame
     class Oco
     {
         private Player sohuu;
-        private int tag;
+        private int i;
+        private int j;
 
         public Player SoHuu
         {
             get { return sohuu; }
             set { sohuu = value; }
         }
-        public int Tag
+        public int soHang
         {
-            get { return tag; }
-            set { tag = value; }
+            get { return i; }
+            set { i = value; }
+        }
+        public int soCot
+        {
+            get { return j; }
+            set { j = value; }
+        }
+        public Oco()
+        {
+            SoHuu = new Player(0,"xxx");
         }
     }
 }

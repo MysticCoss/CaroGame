@@ -12,6 +12,7 @@ namespace CaroGame
         private int id;
         private string mark;
         private Color color;
+        private bool isComputer = false;
         public int Id
         {
             get { return id; }
@@ -27,7 +28,11 @@ namespace CaroGame
             get { return this.color; }
             set { color = value; }
         }
-
+        public bool IsComputer
+        {
+            get { return isComputer; }
+            set { isComputer = value; }
+        }
         public Player ( int id, string mark)
         {
             this.id = id;

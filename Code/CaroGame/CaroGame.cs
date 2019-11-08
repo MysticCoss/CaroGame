@@ -13,6 +13,7 @@ namespace CaroGame
     public partial class CaroGame : Form
     {
         private GameControl game_Control;
+        public bool computerMode = false;
         public CaroGame()
         {
             InitializeComponent();
@@ -26,12 +27,13 @@ namespace CaroGame
 
         private void btn_PvP_Click(object sender, EventArgs e)
         {
-            game_Control.VeBanCo();
+            game_Control.VeBanCo(computerMode);
         }
 
         private void btn_PvM_Click(object sender, EventArgs e)
         {
-            game_Control.VeBanCo();
+            computerMode = true;
+            game_Control.VeBanCo(computerMode);
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -72,7 +74,7 @@ namespace CaroGame
             if (result == DialogResult.Yes)
             {
                 game_Control.huyVan();
-                game_Control.VeBanCo();
+                game_Control.VeBanCo(computerMode);
             }
         }
      

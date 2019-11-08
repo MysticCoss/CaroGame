@@ -51,9 +51,9 @@ namespace CaroGame
 
 
 
-
+        //vùng các hàm xử lí game
         #region Function
-        public void VeBanCo()
+        public void VeBanCo(bool computerMode)
         {
             matrix = new Oco[SoLieu.CHESS_BOARD_ROW,SoLieu.CHESS_BOARD_COLUMN];
 
@@ -73,13 +73,15 @@ namespace CaroGame
                     pnl_BanCo.Controls.Add(btn);
                     temp = btn;
                     matrix[i, j] = new Oco();
+                    matrix[i, j].soHang = i;
+                    matrix[i, j].soCot = j;
                 }
                 temp.Location = new Point(0, temp.Location.Y + temp.Height);
                 temp.Width = 0;
                 temp.Height = 0;
 
             }
-            players = initPlayer();
+            players = initPlayer(computerMode);
         }
 
         public void huyVan()
@@ -90,7 +92,10 @@ namespace CaroGame
         private void btn_Click(object sender, EventArgs e)
         {
             Button btn = sender as Button;
-            if (btn.Text != "") return;
+            if (!currentPlayer.IsComputer)
+            {
+                if (btn.Text != "") return;
+            }
             btn.Text = currentPlayer.Mark;
             btn.ForeColor = currentPlayer.Color;
 
@@ -101,6 +106,7 @@ namespace CaroGame
             //Console.WriteLine("Hang: "+viTriHang+", Cot: "+viTriCot);
 
             //Lưu nước cờ.
+            //if(!currentPlayer.IsComputer)
             matrix[viTriHang, viTriCot].SoHuu = CurrentPlayer;
 
             if (isEndGame(viTriHang,viTriCot))
@@ -109,12 +115,24 @@ namespace CaroGame
                 return;
             }
             ChangePlayer();
+            if (form.computerMode && currentPlayer.IsComputer)
+            {
+                MayDanh();
+            }
+            
         }
+
+
         private void EndGame()
         {
-            MessageBox.Show(currentPlayer.Mark + " thắng!");
-            huyVan();
-            VeBanCo();
+            bool temp=  players[1].IsComputer;
+           DialogResult result = MessageBox.Show(currentPlayer.Mark + " thắng!, Bạn có muốn chơi lại?","Xác nhận",MessageBoxButtons.YesNo);
+           huyVan();
+           if(result == DialogResult.Yes)
+            {
+                VeBanCo(temp);
+            }
+            
         }
 
         //Kiểm tra xem đã kết thúc trận đấu chưa
@@ -258,19 +276,25 @@ namespace CaroGame
             form.lblLuotDi.ForeColor = currentPlayer.Color;
         }
 
-        private List<Player> initPlayer()
+        private List<Player> initPlayer(bool computerMode)
         {
             Player player1;
             Player player2;
+           
             List<Player> players = new List<Player>();
             if (form.getRadioButonX().Checked == true)
             {
                  player1 = new Player(0, "X");
                  player2 = new Player(1, "O");
+               
             }else
             {
                  player1 = new Player(1, "O");
                  player2 = new Player(0, "X");
+            }
+            if (computerMode)
+            {
+                player2.IsComputer = true;
             }
             players.Add(player1);
             players.Add(player2);
@@ -279,6 +303,723 @@ namespace CaroGame
             form.lblLuotDi.ForeColor = currentPlayer.Color;
             return players;
         }
+        public void MayQuyetDinhDanh(int i, int j)
+        {
+            string tag = string.Format("{0};{1}", i, j);
+            Console.WriteLine(tag);
+            foreach (Button control in pnl_BanCo.Controls)
+            {
+                if (control.Tag.Equals(tag))
+                {
+                    control.PerformClick();
+                    break;
+                }
+            }
+        }
         #endregion
+
+
+        //vùng thuật toán AI
+        #region AI
+        private void MayDanh()
+        {
+            int diemMax = 0;
+            int diemPhongNgu = 0;
+            int diemTanCong = 0;
+            int imax =0 ;
+            int jmax=0;
+            for(int i = 0; i < SoLieu.CHESS_BOARD_ROW; i++)
+            {
+                for(int j = 0; j < SoLieu.CHESS_BOARD_COLUMN; j++)
+                {
+                    if (matrix[i, j].SoHuu.Mark == "xxx" && !CatTia(matrix[i,j]))
+                    {
+                        int diemTam;
+                        diemTanCong = duyetTCNgang(i, j) + duyetTCDoc(i, j) + duyetTCCheoChinh(i,j) + duyetTCCheoPhu(i, j);
+                       
+                        diemPhongNgu = duyetPNNgang(i, j) + duyetPNDoc(i, j) + duyetPNCheoChinh(i,j) + duyetPNCheoPhu(i, j);
+                        if (diemPhongNgu > diemTanCong)
+                        {
+                            diemTam = diemPhongNgu;
+                        }else
+                        {
+                            diemTam = diemTanCong;
+                        }
+
+                        if (diemMax < diemTam)
+                        {
+                            diemMax = diemTam;
+                            imax = i;
+                            jmax = j;
+                        }
+                    }
+                }
+                
+            }
+            MayQuyetDinhDanh(imax, jmax);
+        }
+
+       
+
+
+
+
+
+
+        //mảng điểm tấn công, phòng ngự:
+        private int[] MangDiemTanCong = new int[7] { 0, 4, 25, 246, 7300, 6561, 59049 };
+        private int[] MangDiemPhongNgu = new int[7] { 0, 3, 24, 243, 2197, 19773, 177957 };
+        //private int[] MangDiemPhongNgu = new int[7] { 0, 1, 9, 81, 729, 6561, 59049 };
+
+
+        //các hàm duyệt tấn công
+        #region Tấn Công
+        private int duyetTCNgang(int dongHT, int cotHT)
+        {
+            int DiemTanCong = 0;
+            int SoQuanTa = 0;
+            int SoQuanDichPhai = 0;
+            int SoQuanDichTrai = 0;
+            int KhoangChong = 0;
+
+            //bên phải
+            for (int dem = 1; dem <= 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5; dem++)
+            {
+
+                if (matrix[dongHT, cotHT + dem].SoHuu.Equals(players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
+
+                    SoQuanTa++;
+                    KhoangChong++;
+                }
+                else
+                    if (matrix[dongHT, cotHT + dem].SoHuu.Equals( players[0]))
+                {
+                    SoQuanDichPhai++;
+                    break;
+                }
+                else KhoangChong++;
+            }
+            //bên trái
+            for (int dem = 1; dem <= 4 && cotHT > 4; dem++)
+            {
+                if (matrix[dongHT, cotHT - dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
+
+                    SoQuanTa++;
+                    KhoangChong++;
+
+                }
+                else
+                    if (matrix[dongHT, cotHT - dem].SoHuu.Equals( players[0]))
+                {
+                    SoQuanDichTrai++;
+                    break;
+                }
+                else KhoangChong++;
+            }
+            //bị chặn 2 đầu khoảng chống không đủ tạo thành 5 nước
+            if (SoQuanDichPhai > 0 && SoQuanDichTrai > 0 && KhoangChong < 4)
+                return 0;
+
+            DiemTanCong -= MangDiemPhongNgu[SoQuanDichPhai + SoQuanDichTrai];
+            DiemTanCong += MangDiemTanCong[SoQuanTa];
+            return DiemTanCong;
+    }
+
+        private int duyetTCDoc(int dongHT, int cotHT)
+        {
+        int DiemTanCong = 0;
+        int SoQuanTa = 0;
+        int SoQuanDichTren = 0;
+        int SoQuanDichDuoi = 0;
+        int KhoangChong = 0;
+
+        //bên trên
+        for (int dem = 1; dem <= 4 && dongHT > 4; dem++)
+        {
+            if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[1]))
+            {
+                if (dem == 1)
+                    DiemTanCong += 37;
+
+                SoQuanTa++;
+                KhoangChong++;
+
+            }
+            else
+                if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[0]))
+            {
+                SoQuanDichTren++;
+                break;
+            }
+            else KhoangChong++;
+        }
+        //bên dưới
+        for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
+        {
+            if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[1]))
+            {
+                if (dem == 1)
+                    DiemTanCong += 37;
+
+                SoQuanTa++;
+                KhoangChong++;
+
+            }
+            else
+                if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[0]))
+            {
+                SoQuanDichDuoi++;
+                break;
+            }
+            else KhoangChong++;
+        }
+        //bị chặn 2 đầu khoảng chống không đủ tạo thành 5 nước
+        if (SoQuanDichTren > 0 && SoQuanDichDuoi > 0 && KhoangChong < 4)
+            return 0;
+
+        DiemTanCong -= MangDiemPhongNgu[SoQuanDichTren + SoQuanDichDuoi];
+        DiemTanCong += MangDiemTanCong[SoQuanTa];
+        return DiemTanCong;
+    }
+
+        private int duyetTCCheoChinh(int dongHT, int cotHT)
+        {
+            int DiemTanCong = 1;
+            int SoQuanTa = 0;
+            int SoQuanDichCheoTren = 0;
+            int SoQuanDichCheoDuoi = 0;
+            int KhoangChong = 0;
+
+            //bên chéo xuôi xuống
+            for (int dem = 1; dem <= 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
+            {
+                if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
+
+                    SoQuanTa++;
+                    KhoangChong++;
+
+                }
+                else
+                    if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals(players[0]))
+                {
+                    SoQuanDichCheoTren++;
+                    break;
+                }
+                else KhoangChong++;
+            }
+            //chéo xuôi lên
+            for (int dem = 1; dem <= 4 && dongHT > 4 && cotHT > 4; dem++)
+            {
+                if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
+
+                    SoQuanTa++;
+                    KhoangChong++;
+
+                }
+                else
+                    if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[0]))
+                {
+                    SoQuanDichCheoDuoi++;
+                    break;
+                }
+                else KhoangChong++;
+            }
+            //bị chặn 2 đầu khoảng chống không đủ tạo thành 5 nước
+            if (SoQuanDichCheoTren > 0 && SoQuanDichCheoDuoi > 0 && KhoangChong < 4)
+                return 0;
+
+            DiemTanCong -= MangDiemPhongNgu[SoQuanDichCheoTren + SoQuanDichCheoDuoi];
+            DiemTanCong += MangDiemTanCong[SoQuanTa];
+            return DiemTanCong;
+        }
+
+        private int duyetTCCheoPhu(int dongHT, int cotHT)
+        {
+            int DiemTanCong = 0;
+            int SoQuanTa = 0;
+            int SoQuanDichCheoTren = 0;
+            int SoQuanDichCheoDuoi = 0;
+            int KhoangChong = 0;
+
+            //chéo ngược lên
+            for (int dem = 1; dem <= 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5 && dongHT > 4; dem++)
+            {
+                if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
+
+                    SoQuanTa++;
+                    KhoangChong++;
+
+                }
+                else
+                    if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[0]))
+                {
+                    SoQuanDichCheoTren++;
+                    break;
+                }
+                else KhoangChong++;
+            }
+            //chéo ngược xuống
+            for (int dem = 1; dem <= 4 && cotHT > 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
+            {
+                if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
+
+                    SoQuanTa++;
+                    KhoangChong++;
+
+                }
+                else
+                    if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[0]))
+                {
+                    SoQuanDichCheoDuoi++;
+                    break;
+                }
+                else KhoangChong++;
+            }
+            //bị chặn 2 đầu khoảng chống không đủ tạo thành 5 nước
+            if (SoQuanDichCheoTren > 0 && SoQuanDichCheoDuoi > 0 && KhoangChong < 4)
+                return 0;
+
+            DiemTanCong -= MangDiemPhongNgu[SoQuanDichCheoTren + SoQuanDichCheoDuoi];
+            DiemTanCong += MangDiemTanCong[SoQuanTa];
+            return DiemTanCong;
+        }
+        #endregion
+
+
+
+        //các hàm duyệt phòng thủ
+        #region Phòng Thủ
+        private int duyetPNNgang(int dongHT, int cotHT)
+        {
+            int DiemPhongNgu = 0;
+            int SoQuanTaTrai = 0;
+            int SoQuanTaPhai = 0;
+            int SoQuanDich = 0;
+            int KhoangChongPhai = 0;
+            int KhoangChongTrai = 0;
+            bool ok = false;
+
+
+            for (int dem = 1; dem <= 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5; dem++)
+            {
+                if (matrix[dongHT, cotHT + dem].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+                }
+                else
+                    if (matrix[dongHT, cotHT + dem].SoHuu.Equals(players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaTrai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongPhai++;
+                }
+            }
+
+            if (SoQuanDich == 3 && KhoangChongPhai == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            ok = false;
+
+            for (int dem = 1; dem <= 4 && cotHT > 4; dem++)
+            {
+                if (matrix[dongHT, cotHT - dem].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+                }
+                else
+                    if (matrix[dongHT, cotHT - dem].SoHuu.Equals(players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaPhai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongTrai++;
+                }
+            }
+
+            if (SoQuanDich == 3 && KhoangChongTrai == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            if (SoQuanTaPhai > 0 && SoQuanTaTrai > 0 && (KhoangChongTrai + KhoangChongPhai + SoQuanDich) < 4)
+                return 0;
+
+            DiemPhongNgu -= MangDiemTanCong[SoQuanTaPhai + SoQuanTaPhai];
+            DiemPhongNgu += MangDiemPhongNgu[SoQuanDich];
+
+            return DiemPhongNgu;
+        }
+
+        private int duyetPNDoc(int dongHT, int cotHT)
+        {
+            int DiemPhongNgu = 0;
+            int SoQuanTaTrai = 0;
+            int SoQuanTaPhai = 0;
+            int SoQuanDich = 0;
+            int KhoangChongTren = 0;
+            int KhoangChongDuoi = 0;
+            bool ok = false;
+
+            //lên
+            for (int dem = 1; dem <= 4 && dongHT > 4; dem++)
+            {
+                if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+
+                }
+                else
+                    if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaPhai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongTren++;
+                }
+            }
+
+            if (SoQuanDich == 3 && KhoangChongTren == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            ok = false;
+            //xuống
+            for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
+            {
+                //gặp quân địch
+                if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+                }
+                else
+                    if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaTrai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongDuoi++;
+                }
+            }
+
+            if (SoQuanDich == 3 && KhoangChongDuoi == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            if (SoQuanTaPhai > 0 && SoQuanTaTrai > 0 && (KhoangChongTren + KhoangChongDuoi + SoQuanDich) < 4)
+                return 0;
+
+            DiemPhongNgu -= MangDiemTanCong[SoQuanTaTrai + SoQuanTaPhai];
+            DiemPhongNgu += MangDiemPhongNgu[SoQuanDich];
+            return DiemPhongNgu;
+        }
+        private int duyetPNCheoChinh(int dongHT, int cotHT)
+        {
+            int DiemPhongNgu = 0;
+            int SoQuanTaTrai = 0;
+            int SoQuanTaPhai = 0;
+            int SoQuanDich = 0;
+            int KhoangChongTren = 0;
+            int KhoangChongDuoi = 0;
+            bool ok = false;
+
+            //lên
+            for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5; dem++)
+            {
+                if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+                }
+                else
+                    if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals(players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaPhai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongTren++;
+                }
+            }
+
+            if (SoQuanDich == 3 && KhoangChongTren == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            ok = false;
+            //xuống
+            for (int dem = 1; dem <= 4 && dongHT > 4 && cotHT > 4; dem++)
+            {
+                if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+                }
+                else
+                    if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaTrai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongDuoi++;
+                }
+            }
+
+            if (SoQuanDich == 3 && KhoangChongDuoi == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            if (SoQuanTaPhai > 0 && SoQuanTaTrai > 0 && (KhoangChongTren + KhoangChongDuoi + SoQuanDich) < 4)
+                return 0;
+
+            DiemPhongNgu -= MangDiemTanCong[SoQuanTaPhai + SoQuanTaTrai];
+            DiemPhongNgu += MangDiemPhongNgu[SoQuanDich];
+
+            return DiemPhongNgu;
+        }
+
+        private int duyetPNCheoPhu(int dongHT, int cotHT)
+        {
+            int DiemPhongNgu = 0;
+            int SoQuanTaTrai = 0;
+            int SoQuanTaPhai = 0;
+            int SoQuanDich = 0;
+            int KhoangChongTren = 0;
+            int KhoangChongDuoi = 0;
+            bool ok = false;
+
+            //lên
+            for (int dem = 1; dem <= 4 && dongHT > 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5; dem++)
+            {
+
+                if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+                }
+                else
+                    if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaPhai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongTren++;
+                }
+            }
+
+
+            if (SoQuanDich == 3 && KhoangChongTren == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            ok = false;
+
+            //xuống
+            for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5 && cotHT > 4; dem++)
+            {
+                if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[0]))
+                {
+                    if (dem == 1)
+                        DiemPhongNgu += 9;
+
+                    SoQuanDich++;
+                }
+                else
+                    if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[1]))
+                {
+                    if (dem == 4)
+                        DiemPhongNgu -= 170;
+
+                    SoQuanTaTrai++;
+                    break;
+                }
+                else
+                {
+                    if (dem == 1)
+                        ok = true;
+
+                    KhoangChongDuoi++;
+                }
+            }
+
+            if (SoQuanDich == 3 && KhoangChongDuoi == 1 && ok)
+                DiemPhongNgu -= 200;
+
+            if (SoQuanTaPhai > 0 && SoQuanTaTrai > 0 && (KhoangChongTren + KhoangChongDuoi + SoQuanDich) < 4)
+                return 0;
+
+            DiemPhongNgu -= MangDiemTanCong[SoQuanTaTrai + SoQuanTaPhai];
+            DiemPhongNgu += MangDiemPhongNgu[SoQuanDich];
+
+            return DiemPhongNgu;
+        }
+        #endregion
+        //các hàm phục vụ thuật toán alpha-beta pruning
+        #region Bổ sung Cắt tỉa Alpha-Beta
+        private bool CatTia(Oco oCo)
+        {
+            if (catTiaNgang(oCo) && catTiaDoc(oCo) && catTiaCheoChinh(oCo) && catTiaCheoPhu(oCo))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool catTiaCheoPhu(Oco oCo)
+        {
+            //duyệt từ trên xuống
+            if (oCo.soHang <= SoLieu.CHESS_BOARD_ROW - 5 && oCo.soCot <= SoLieu.CHESS_BOARD_COLUMN - 5)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang + i, oCo.soCot + i].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+
+            //duyệt từ giưới lên
+            if (oCo.soCot >= 4 && oCo.soHang >= 4)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang - i, oCo.soCot - i].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+
+            //nếu chạy đến đây tức duyệt 2 bên đều không có nước đánh thì cắt tỉa
+            return true;
+        }
+
+        private bool catTiaCheoChinh(Oco oCo)
+        {
+            //duyệt từ trên xuống
+            if (oCo.soHang <= SoLieu.CHESS_BOARD_ROW - 5 && oCo.soCot >= 4)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang + i, oCo.soCot - i].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+
+            //duyệt từ giưới lên
+            if (oCo.soCot <= SoLieu.CHESS_BOARD_COLUMN - 5 && oCo.soHang >= 4)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang - i, oCo.soCot + i].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+
+            //nếu chạy đến đây tức duyệt 2 bên đều không có nước đánh thì cắt tỉa
+            return true;
+        }
+
+        private bool catTiaDoc(Oco oCo)
+        {
+            //duyệt phía dưới
+            if (oCo.soHang <= SoLieu.CHESS_BOARD_ROW - 5)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang + i, oCo.soCot].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+
+            //duyệt phía trên
+            if (oCo.soHang >= 4)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang - i, oCo.soCot].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+
+            //nếu chạy đến đây tức duyệt 2 bên đều không có nước đánh thì cắt tỉa
+            return true;
+        }
+
+        private bool catTiaNgang(Oco oCo)
+        {
+            //duyệt phải
+             if (oCo.soCot <= SoLieu.CHESS_BOARD_COLUMN - 5)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang, oCo.soCot + i].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+            //duyệt trái
+            if (oCo.soCot >= 4)
+                for (int i = 1; i <= 4; i++)
+                    if (matrix[oCo.soHang, oCo.soCot - i].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
+                        return false;
+            return true;
+        }
+        #endregion
+
+        #endregion
+
     }
 }
