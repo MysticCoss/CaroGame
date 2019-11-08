@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -16,10 +17,10 @@ namespace CaroGame
         private Player currentPlayer;
         private Oco[,] matrix;
 
-        public GameControl(CaroGame form,Panel pnl_BanCo)
+        public GameControl(CaroGame form, Panel pnl_BanCo)
         {
             this.form = form;
-            this.pnl_BanCo =pnl_BanCo;
+            this.pnl_BanCo = pnl_BanCo;
         }
 
         #region properties
@@ -55,9 +56,9 @@ namespace CaroGame
         #region Function
         public void VeBanCo(bool computerMode)
         {
-            matrix = new Oco[SoLieu.CHESS_BOARD_ROW,SoLieu.CHESS_BOARD_COLUMN];
+            matrix = new Oco[SoLieu.CHESS_BOARD_ROW, SoLieu.CHESS_BOARD_COLUMN];
 
-            Button temp = new Button() { Width = 0, Height = 0, Location = new Point(0, 0) };
+            Point temp = new Point(0, 0) ;
 
             for (int i = 0; i < SoLieu.CHESS_BOARD_ROW; i++)
             {
@@ -65,20 +66,20 @@ namespace CaroGame
                 {
                     Button btn = new Button()
                     {
-                        Width = SoLieu.CHESS_SIZE, Height = SoLieu.CHESS_SIZE,
-                        Location = new Point(temp.Location.X + temp.Width, temp.Location.Y),
+                        Width = SoLieu.CHESS_SIZE,
+                        Height = SoLieu.CHESS_SIZE,
+                        Location = new Point(temp.X + SoLieu.CHESS_SIZE, temp.Y),
                         Tag = String.Format("{0};{1}", i, j)
                     };
                     btn.Click += btn_Click;
                     pnl_BanCo.Controls.Add(btn);
-                    temp = btn;
+                    temp = btn.Location;
                     matrix[i, j] = new Oco();
                     matrix[i, j].soHang = i;
                     matrix[i, j].soCot = j;
                 }
-                temp.Location = new Point(0, temp.Location.Y + temp.Height);
-                temp.Width = 0;
-                temp.Height = 0;
+                temp = new Point(0, temp.Y + SoLieu.CHESS_SIZE);
+                
 
             }
             players = initPlayer(computerMode);
@@ -91,7 +92,9 @@ namespace CaroGame
 
         private void btn_Click(object sender, EventArgs e)
         {
+            Console.Beep(587, 125);
             Button btn = sender as Button;
+            Console.WriteLine("Press: " + btn.Tag);
             if (!currentPlayer.IsComputer)
             {
                 if (btn.Text != "") return;
@@ -109,7 +112,7 @@ namespace CaroGame
             //if(!currentPlayer.IsComputer)
             matrix[viTriHang, viTriCot].SoHuu = CurrentPlayer;
 
-            if (isEndGame(viTriHang,viTriCot))
+            if (isEndGame(viTriHang, viTriCot))
             {
                 EndGame();
                 return;
@@ -119,25 +122,26 @@ namespace CaroGame
             {
                 MayDanh();
             }
-            
+
         }
 
 
         private void EndGame()
         {
-            bool temp=  players[1].IsComputer;
-           DialogResult result = MessageBox.Show(currentPlayer.Mark + " thắng!, Bạn có muốn chơi lại?","Xác nhận",MessageBoxButtons.YesNo);
-           huyVan();
-           if(result == DialogResult.Yes)
+            bool temp = players[1].IsComputer;
+            Console.Beep(330, 125);
+            DialogResult result = MessageBox.Show(currentPlayer.Mark + " thắng!, Bạn có muốn chơi lại?", "Xác nhận", MessageBoxButtons.YesNo);
+            huyVan();
+            if (result == DialogResult.Yes)
             {
                 VeBanCo(temp);
             }
-            
+
         }
 
         //Kiểm tra xem đã kết thúc trận đấu chưa
         #region KiemTraKetQua
-        private bool isEndGame(int i,int j)
+        private bool isEndGame(int i, int j)
         {
             if (HangNgang(i, j) || HangDoc(i, j) || CheoChinh(i, j) || CheoPhu(i, j))
             {
@@ -148,9 +152,9 @@ namespace CaroGame
         private bool HangNgang(int i, int j)
         {
             int LCount = 0, RCount = 0;
-            for(int k = j+1; k < SoLieu.CHESS_BOARD_COLUMN; k++)
+            for (int k = j + 1; k < SoLieu.CHESS_BOARD_COLUMN; k++)
             {
-                if (matrix[i, k].SoHuu == null) break;
+                if (matrix[i, k].SoHuu.Mark == "xxx") break;
                 if (matrix[i, k].SoHuu.Equals(CurrentPlayer))
                 {
                     RCount++;
@@ -163,7 +167,7 @@ namespace CaroGame
 
             for (int k = j; k >= 0; k--)
             {
-                if (matrix[i, k].SoHuu == null) break;
+                if (matrix[i, k].SoHuu.Mark == "xxx") break;
                 if (matrix[i, k].SoHuu.Equals(CurrentPlayer))
                 {
                     LCount++;
@@ -173,7 +177,7 @@ namespace CaroGame
                     break;
                 }
             }
-            return LCount + RCount == 5;
+            return LCount + RCount > 4;
         }
 
         private bool HangDoc(int i, int j)
@@ -182,7 +186,7 @@ namespace CaroGame
 
             for (int k = i + 1; k < SoLieu.CHESS_BOARD_ROW; k++)
             {
-                if (matrix[k, j].SoHuu == null) break;
+                if (matrix[k, j].SoHuu.Mark == "xxx") break;
                 if (matrix[k, j].SoHuu.Equals(CurrentPlayer))
                 {
                     BCount++;
@@ -195,8 +199,8 @@ namespace CaroGame
 
             for (int k = i; k >= 0; k--)
             {
-                if (matrix[k,j].SoHuu == null) break;
-                if (matrix[k,j].SoHuu.Equals(CurrentPlayer))
+                if (matrix[k, j].SoHuu.Mark == "xxx") break;
+                if (matrix[k, j].SoHuu.Equals(CurrentPlayer))
                 {
                     TCount++;
                 }
@@ -213,11 +217,12 @@ namespace CaroGame
         {
             int RCount = 0;
             int l = j;
-            for(int k = i; k < SoLieu.CHESS_BOARD_ROW; k++)
+            for (int k = i; k < SoLieu.CHESS_BOARD_ROW; k++)
             {
                 if (l >= SoLieu.CHESS_BOARD_COLUMN) break;
-                if (matrix[k, l].SoHuu == null) break;
-                if ( matrix[k, l].SoHuu.Equals(currentPlayer))
+                if (matrix[k, l].SoHuu.Mark == "xxx") break;
+                if (!matrix[k, l].SoHuu.Equals(currentPlayer)) break;
+                if (matrix[k, l].SoHuu.Equals(currentPlayer))
                 {
                     RCount++;
                 }
@@ -225,11 +230,12 @@ namespace CaroGame
             }
             l = j;
             int LCount = -1;
-            for(int k = i; k >= 0; k--)
+            for (int k = i; k >= 0; k--)
             {
                 if (l < 0) break;
-                if (matrix[k, l].SoHuu == null) break;
-                if ( matrix[k, l].SoHuu.Equals(currentPlayer))
+                if (matrix[k, l].SoHuu.Mark == "xxx") break;
+                if (!matrix[k, l].SoHuu.Equals(currentPlayer)) break;
+                if (matrix[k, l].SoHuu.Equals(currentPlayer))
                 {
                     LCount++;
                 }
@@ -243,10 +249,11 @@ namespace CaroGame
         {
             int LCount = 0;
             int l = j;
-            for(int k = i; k < SoLieu.CHESS_BOARD_ROW; k++)
+            for (int k = i; k < SoLieu.CHESS_BOARD_ROW; k++)
             {
                 if (l < 0) break;
-                if (matrix[k, l].SoHuu == null) break;
+                if (matrix[k, l].SoHuu.Mark == "xxx") break;
+                if (!matrix[k, l].SoHuu.Equals(currentPlayer)) break;
                 if (matrix[k, l].SoHuu.Equals(currentPlayer))
                 {
                     LCount++;
@@ -255,10 +262,11 @@ namespace CaroGame
             }
             int RCount = -1;
             l = j;
-            for(int k = i; k >= 0; k--)
+            for (int k = i; k >= 0; k--)
             {
                 if (l >= SoLieu.CHESS_BOARD_COLUMN) break;
-                if (matrix[k, l].SoHuu == null) break;
+                if (matrix[k, l].SoHuu.Mark == "xxx") break;
+                if (!matrix[k, l].SoHuu.Equals(currentPlayer)) break;
                 if (matrix[k, l].SoHuu.Equals(currentPlayer))
                 {
                     RCount++;
@@ -280,17 +288,18 @@ namespace CaroGame
         {
             Player player1;
             Player player2;
-           
+
             List<Player> players = new List<Player>();
             if (form.getRadioButonX().Checked == true)
             {
-                 player1 = new Player(0, "X");
-                 player2 = new Player(1, "O");
-               
-            }else
+                player1 = new Player(0, "X");
+                player2 = new Player(1, "O");
+
+            }
+            else
             {
-                 player1 = new Player(1, "O");
-                 player2 = new Player(0, "X");
+                player1 = new Player(1, "O");
+                player2 = new Player(0, "X");
             }
             if (computerMode)
             {
@@ -326,22 +335,29 @@ namespace CaroGame
             int diemMax = 0;
             int diemPhongNgu = 0;
             int diemTanCong = 0;
-            int imax =0 ;
-            int jmax=0;
-            for(int i = 0; i < SoLieu.CHESS_BOARD_ROW; i++)
+            int imax = 0;
+            int jmax = 0;
+
+            //tính giờ
+            Stopwatch st = new Stopwatch();
+            st.Reset();
+            st.Start();
+            //giải thuật minimax
+            for (int i = 0; i < SoLieu.CHESS_BOARD_ROW; i++)
             {
-                for(int j = 0; j < SoLieu.CHESS_BOARD_COLUMN; j++)
+                for (int j = 0; j < SoLieu.CHESS_BOARD_COLUMN; j++)
                 {
-                    if (matrix[i, j].SoHuu.Mark == "xxx" && !CatTia(matrix[i,j]))
+                    if (matrix[i, j].SoHuu.Mark == "xxx") //&& !CatTia(matrix[i, j]))
                     {
                         int diemTam;
-                        diemTanCong = duyetTCNgang(i, j) + duyetTCDoc(i, j) + duyetTCCheoChinh(i,j) + duyetTCCheoPhu(i, j);
-                       
-                        diemPhongNgu = duyetPNNgang(i, j) + duyetPNDoc(i, j) + duyetPNCheoChinh(i,j) + duyetPNCheoPhu(i, j);
+                        diemTanCong = duyetTCNgang(i, j) + duyetTCDoc(i, j) + duyetTCCheoChinh(i, j) + duyetTCCheoPhu(i, j);
+
+                        diemPhongNgu = duyetPNNgang(i, j) + duyetPNDoc(i, j) + duyetPNCheoChinh(i, j) + duyetPNCheoPhu(i, j);
                         if (diemPhongNgu > diemTanCong)
                         {
                             diemTam = diemPhongNgu;
-                        }else
+                        }
+                        else
                         {
                             diemTam = diemTanCong;
                         }
@@ -354,12 +370,16 @@ namespace CaroGame
                         }
                     }
                 }
-                
+
             }
+            st.Stop();
+            Console.WriteLine("time: " + st.ElapsedMilliseconds.ToString());
+            // Console.WriteLine("Tan Cong: " + diemTanCong + ", Phong ngu: " + diemPhongNgu);
             MayQuyetDinhDanh(imax, jmax);
+           
         }
 
-       
+
 
 
 
@@ -367,14 +387,23 @@ namespace CaroGame
 
 
         //mảng điểm tấn công, phòng ngự:
+        //root
         private int[] MangDiemTanCong = new int[7] { 0, 4, 25, 246, 7300, 6561, 59049 };
         private int[] MangDiemPhongNgu = new int[7] { 0, 3, 24, 243, 2197, 19773, 177957 };
+
+        //nnc
+        //private int[] MangDiemPhongNgu = new int[7] { 0, 1, 9, 81, 729, 6561, 59049 };
+        // private int[] MangDiemPhongNgu = new int[7] { 0, 7, 50 , 350,1750,7860,210000 };
+        //private int[] MangDiemTanCong = new int[7] { 0, 3, 24, 243, 2197, 19773, 177957 };
+
+        //private int[] MangDiemTanCong = new int[7] { 0, 3, 24, 192, 1536, 12288, 98304 };
         //private int[] MangDiemPhongNgu = new int[7] { 0, 1, 9, 81, 729, 6561, 59049 };
 
 
         //các hàm duyệt tấn công
         #region Tấn Công
         private int duyetTCNgang(int dongHT, int cotHT)
+
         {
             int DiemTanCong = 0;
             int SoQuanTa = 0;
@@ -395,7 +424,7 @@ namespace CaroGame
                     KhoangChong++;
                 }
                 else
-                    if (matrix[dongHT, cotHT + dem].SoHuu.Equals( players[0]))
+                    if (matrix[dongHT, cotHT + dem].SoHuu.Equals(players[0]))
                 {
                     SoQuanDichPhai++;
                     break;
@@ -405,7 +434,7 @@ namespace CaroGame
             //bên trái
             for (int dem = 1; dem <= 4 && cotHT > 4; dem++)
             {
-                if (matrix[dongHT, cotHT - dem].SoHuu.Equals( players[1]))
+                if (matrix[dongHT, cotHT - dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 1)
                         DiemTanCong += 37;
@@ -415,7 +444,7 @@ namespace CaroGame
 
                 }
                 else
-                    if (matrix[dongHT, cotHT - dem].SoHuu.Equals( players[0]))
+                    if (matrix[dongHT, cotHT - dem].SoHuu.Equals(players[0]))
                 {
                     SoQuanDichTrai++;
                     break;
@@ -429,64 +458,64 @@ namespace CaroGame
             DiemTanCong -= MangDiemPhongNgu[SoQuanDichPhai + SoQuanDichTrai];
             DiemTanCong += MangDiemTanCong[SoQuanTa];
             return DiemTanCong;
-    }
+        }
 
         private int duyetTCDoc(int dongHT, int cotHT)
         {
-        int DiemTanCong = 0;
-        int SoQuanTa = 0;
-        int SoQuanDichTren = 0;
-        int SoQuanDichDuoi = 0;
-        int KhoangChong = 0;
+            int DiemTanCong = 0;
+            int SoQuanTa = 0;
+            int SoQuanDichTren = 0;
+            int SoQuanDichDuoi = 0;
+            int KhoangChong = 0;
 
-        //bên trên
-        for (int dem = 1; dem <= 4 && dongHT > 4; dem++)
-        {
-            if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[1]))
+            //bên trên
+            for (int dem = 1; dem <= 4 && dongHT > 4; dem++)
             {
-                if (dem == 1)
-                    DiemTanCong += 37;
+                if (matrix[dongHT - dem, cotHT].SoHuu.Equals(players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
 
-                SoQuanTa++;
-                KhoangChong++;
+                    SoQuanTa++;
+                    KhoangChong++;
 
+                }
+                else
+                    if (matrix[dongHT - dem, cotHT].SoHuu.Equals(players[0]))
+                {
+                    SoQuanDichTren++;
+                    break;
+                }
+                else KhoangChong++;
             }
-            else
-                if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[0]))
+            //bên dưới
+            for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
             {
-                SoQuanDichTren++;
-                break;
+                if (matrix[dongHT + dem, cotHT].SoHuu.Equals(players[1]))
+                {
+                    if (dem == 1)
+                        DiemTanCong += 37;
+
+                    SoQuanTa++;
+                    KhoangChong++;
+
+                }
+                else
+                    if (matrix[dongHT + dem, cotHT].SoHuu.Equals(players[0]))
+                {
+                    SoQuanDichDuoi++;
+                    break;
+                }
+                else KhoangChong++;
             }
-            else KhoangChong++;
+            //bị chặn 2 đầu khoảng chống không đủ tạo thành 5 nước
+            if (SoQuanDichTren > 0 && SoQuanDichDuoi > 0 && KhoangChong < 4)
+                return 0;
+
+            DiemTanCong -= MangDiemPhongNgu[SoQuanDichTren + SoQuanDichDuoi];
+            DiemTanCong += MangDiemTanCong[SoQuanTa];
+            return DiemTanCong;
         }
-        //bên dưới
-        for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
-        {
-            if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[1]))
-            {
-                if (dem == 1)
-                    DiemTanCong += 37;
-
-                SoQuanTa++;
-                KhoangChong++;
-
-            }
-            else
-                if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[0]))
-            {
-                SoQuanDichDuoi++;
-                break;
-            }
-            else KhoangChong++;
-        }
-        //bị chặn 2 đầu khoảng chống không đủ tạo thành 5 nước
-        if (SoQuanDichTren > 0 && SoQuanDichDuoi > 0 && KhoangChong < 4)
-            return 0;
-
-        DiemTanCong -= MangDiemPhongNgu[SoQuanDichTren + SoQuanDichDuoi];
-        DiemTanCong += MangDiemTanCong[SoQuanTa];
-        return DiemTanCong;
-    }
 
         private int duyetTCCheoChinh(int dongHT, int cotHT)
         {
@@ -499,7 +528,7 @@ namespace CaroGame
             //bên chéo xuôi xuống
             for (int dem = 1; dem <= 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
             {
-                if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals( players[1]))
+                if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 1)
                         DiemTanCong += 37;
@@ -519,7 +548,7 @@ namespace CaroGame
             //chéo xuôi lên
             for (int dem = 1; dem <= 4 && dongHT > 4 && cotHT > 4; dem++)
             {
-                if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[1]))
+                if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 1)
                         DiemTanCong += 37;
@@ -529,7 +558,7 @@ namespace CaroGame
 
                 }
                 else
-                    if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[0]))
+                    if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals(players[0]))
                 {
                     SoQuanDichCheoDuoi++;
                     break;
@@ -556,7 +585,7 @@ namespace CaroGame
             //chéo ngược lên
             for (int dem = 1; dem <= 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5 && dongHT > 4; dem++)
             {
-                if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[1]))
+                if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 1)
                         DiemTanCong += 37;
@@ -566,7 +595,7 @@ namespace CaroGame
 
                 }
                 else
-                    if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[0]))
+                    if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals(players[0]))
                 {
                     SoQuanDichCheoTren++;
                     break;
@@ -576,7 +605,7 @@ namespace CaroGame
             //chéo ngược xuống
             for (int dem = 1; dem <= 4 && cotHT > 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
             {
-                if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[1]))
+                if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 1)
                         DiemTanCong += 37;
@@ -586,7 +615,7 @@ namespace CaroGame
 
                 }
                 else
-                    if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[0]))
+                    if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals(players[0]))
                 {
                     SoQuanDichCheoDuoi++;
                     break;
@@ -620,7 +649,7 @@ namespace CaroGame
 
             for (int dem = 1; dem <= 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5; dem++)
             {
-                if (matrix[dongHT, cotHT + dem].SoHuu.Equals( players[0]))
+                if (matrix[dongHT, cotHT + dem].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -652,7 +681,7 @@ namespace CaroGame
 
             for (int dem = 1; dem <= 4 && cotHT > 4; dem++)
             {
-                if (matrix[dongHT, cotHT - dem].SoHuu.Equals( players[0]))
+                if (matrix[dongHT, cotHT - dem].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -702,7 +731,7 @@ namespace CaroGame
             //lên
             for (int dem = 1; dem <= 4 && dongHT > 4; dem++)
             {
-                if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[0]))
+                if (matrix[dongHT - dem, cotHT].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -711,7 +740,7 @@ namespace CaroGame
 
                 }
                 else
-                    if (matrix[dongHT - dem, cotHT].SoHuu.Equals( players[1]))
+                    if (matrix[dongHT - dem, cotHT].SoHuu.Equals(players[1]))
                 {
                     if (dem == 4)
                         DiemPhongNgu -= 170;
@@ -736,7 +765,7 @@ namespace CaroGame
             for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5; dem++)
             {
                 //gặp quân địch
-                if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[0]))
+                if (matrix[dongHT + dem, cotHT].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -744,7 +773,7 @@ namespace CaroGame
                     SoQuanDich++;
                 }
                 else
-                    if (matrix[dongHT + dem, cotHT].SoHuu.Equals( players[1]))
+                    if (matrix[dongHT + dem, cotHT].SoHuu.Equals(players[1]))
                 {
                     if (dem == 4)
                         DiemPhongNgu -= 170;
@@ -784,7 +813,7 @@ namespace CaroGame
             //lên
             for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5; dem++)
             {
-                if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals( players[0]))
+                if (matrix[dongHT + dem, cotHT + dem].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -816,7 +845,7 @@ namespace CaroGame
             //xuống
             for (int dem = 1; dem <= 4 && dongHT > 4 && cotHT > 4; dem++)
             {
-                if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[0]))
+                if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -824,7 +853,7 @@ namespace CaroGame
                     SoQuanDich++;
                 }
                 else
-                    if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals( players[1]))
+                    if (matrix[dongHT - dem, cotHT - dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 4)
                         DiemPhongNgu -= 170;
@@ -867,7 +896,7 @@ namespace CaroGame
             for (int dem = 1; dem <= 4 && dongHT > 4 && cotHT < SoLieu.CHESS_BOARD_COLUMN - 5; dem++)
             {
 
-                if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[0]))
+                if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -875,7 +904,7 @@ namespace CaroGame
                     SoQuanDich++;
                 }
                 else
-                    if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals( players[1]))
+                    if (matrix[dongHT - dem, cotHT + dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 4)
                         DiemPhongNgu -= 170;
@@ -901,7 +930,7 @@ namespace CaroGame
             //xuống
             for (int dem = 1; dem <= 4 && dongHT < SoLieu.CHESS_BOARD_ROW - 5 && cotHT > 4; dem++)
             {
-                if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[0]))
+                if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals(players[0]))
                 {
                     if (dem == 1)
                         DiemPhongNgu += 9;
@@ -909,7 +938,7 @@ namespace CaroGame
                     SoQuanDich++;
                 }
                 else
-                    if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals( players[1]))
+                    if (matrix[dongHT + dem, cotHT - dem].SoHuu.Equals(players[1]))
                 {
                     if (dem == 4)
                         DiemPhongNgu -= 170;
@@ -1006,7 +1035,7 @@ namespace CaroGame
         private bool catTiaNgang(Oco oCo)
         {
             //duyệt phải
-             if (oCo.soCot <= SoLieu.CHESS_BOARD_COLUMN - 5)
+            if (oCo.soCot <= SoLieu.CHESS_BOARD_COLUMN - 5)
                 for (int i = 1; i <= 4; i++)
                     if (matrix[oCo.soHang, oCo.soCot + i].SoHuu.Mark != "")//nếu có nước cờ thì không cắt tỉa
                         return false;

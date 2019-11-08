@@ -33,15 +33,15 @@ namespace CaroGame
             get { return isComputer; }
             set { isComputer = value; }
         }
-        public Player ( int id, string mark)
+        public Player(int id, string mark)
         {
             this.id = id;
             this.mark = mark;
-            if (mark.Equals("X")==true)
+            if (mark.Equals("X") == true)
             {
                 color = Color.Green;
             }
             else color = Color.Red;
-        } 
+        }
     }
 }

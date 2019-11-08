@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CaroGame));
             this.pnl_BangDieuKhien = new System.Windows.Forms.Panel();
+            this.lblLuotDi = new System.Windows.Forms.Label();
             this.btn_replay = new System.Windows.Forms.Button();
             this.btn_huy = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -44,8 +45,7 @@
             this.luậtChơiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lawMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.xinĐiLạiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lblLuotDi = new System.Windows.Forms.Label();
+            this.battatnhacToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pnl_BangDieuKhien.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -66,8 +66,17 @@
             this.pnl_BangDieuKhien.Dock = System.Windows.Forms.DockStyle.Left;
             this.pnl_BangDieuKhien.Location = new System.Drawing.Point(0, 24);
             this.pnl_BangDieuKhien.Name = "pnl_BangDieuKhien";
-            this.pnl_BangDieuKhien.Size = new System.Drawing.Size(206, 417);
+            this.pnl_BangDieuKhien.Size = new System.Drawing.Size(206, 418);
             this.pnl_BangDieuKhien.TabIndex = 0;
+            // 
+            // lblLuotDi
+            // 
+            this.lblLuotDi.AutoSize = true;
+            this.lblLuotDi.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLuotDi.Location = new System.Drawing.Point(78, 260);
+            this.lblLuotDi.Name = "lblLuotDi";
+            this.lblLuotDi.Size = new System.Drawing.Size(0, 24);
+            this.lblLuotDi.TabIndex = 5;
             // 
             // btn_replay
             // 
@@ -171,7 +180,7 @@
             this.pnl_BanCo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnl_BanCo.Location = new System.Drawing.Point(206, 24);
             this.pnl_BanCo.Name = "pnl_BanCo";
-            this.pnl_BanCo.Size = new System.Drawing.Size(418, 417);
+            this.pnl_BanCo.Size = new System.Drawing.Size(481, 418);
             this.pnl_BanCo.TabIndex = 1;
             // 
             // menuStrip1
@@ -181,7 +190,7 @@
             this.luậtChơiToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(624, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(687, 24);
             this.menuStrip1.TabIndex = 2;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -190,7 +199,7 @@
             this.luậtChơiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lawMenuItem,
             this.aboutMenuItem,
-            this.xinĐiLạiToolStripMenuItem});
+            this.battatnhacToolStripMenuItem});
             this.luậtChơiToolStripMenuItem.Name = "luậtChơiToolStripMenuItem";
             this.luậtChơiToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
             this.luậtChơiToolStripMenuItem.Text = "Option";
@@ -209,26 +218,18 @@
             this.aboutMenuItem.Text = "About";
             this.aboutMenuItem.Click += new System.EventHandler(this.aboutMenuItem_Click);
             // 
-            // xinĐiLạiToolStripMenuItem
+            // battatnhacToolStripMenuItem
             // 
-            this.xinĐiLạiToolStripMenuItem.Name = "xinĐiLạiToolStripMenuItem";
-            this.xinĐiLạiToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.xinĐiLạiToolStripMenuItem.Text = "Xin đi lại";
-            // 
-            // lblLuotDi
-            // 
-            this.lblLuotDi.AutoSize = true;
-            this.lblLuotDi.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLuotDi.Location = new System.Drawing.Point(78, 260);
-            this.lblLuotDi.Name = "lblLuotDi";
-            this.lblLuotDi.Size = new System.Drawing.Size(0, 24);
-            this.lblLuotDi.TabIndex = 5;
+            this.battatnhacToolStripMenuItem.Name = "battatnhacToolStripMenuItem";
+            this.battatnhacToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.battatnhacToolStripMenuItem.Text = "Bật/Tắt Nhạc";
+            this.battatnhacToolStripMenuItem.Click += new System.EventHandler(this.battatnhacToolStripMenuItem_Click);
             // 
             // CaroGame
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(624, 441);
+            this.ClientSize = new System.Drawing.Size(687, 442);
             this.Controls.Add(this.pnl_BanCo);
             this.Controls.Add(this.pnl_BangDieuKhien);
             this.Controls.Add(this.menuStrip1);
@@ -266,7 +267,7 @@
         private System.Windows.Forms.ToolStripMenuItem aboutMenuItem;
         private System.Windows.Forms.Button btn_replay;
         private System.Windows.Forms.Button btn_huy;
-        private System.Windows.Forms.ToolStripMenuItem xinĐiLạiToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem battatnhacToolStripMenuItem;
         public System.Windows.Forms.Panel pnl_BanCo;
         public System.Windows.Forms.GroupBox groupBox1;
         public System.Windows.Forms.RadioButton radioO;

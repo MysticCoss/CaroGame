@@ -69,5 +69,15 @@ namespace CaroGame.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] YieArKungFu_DangCapNhat_3cjcw {
+            get {
+                object obj = ResourceManager.GetObject("YieArKungFu_DangCapNhat_3cjcw", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

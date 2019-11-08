@@ -55,6 +55,7 @@
     <Compile Include="GameControl.cs" />
     <Compile Include="Oco.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="PlayMusic.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SoLieu.cs" />
@@ -86,6 +87,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\LOGO.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\YieArKungFu-DangCapNhat_3cjcw.mp3" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
