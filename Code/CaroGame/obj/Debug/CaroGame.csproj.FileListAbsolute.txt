@@ -6,3 +6,4 @@ C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\
 C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.csproj.GenerateResource.Cache
 C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.exe
 C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.pdb
+C:\Users\ngocc\OneDrive\Documents\Tai Lieu\TaiLieuTriTueNhanTao\BaiTapNhom\Code\CaroGame\obj\Debug\CaroGame.csprojResolveAssemblyReference.cache

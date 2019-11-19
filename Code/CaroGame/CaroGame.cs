@@ -17,7 +17,7 @@ namespace CaroGame
     {
         private GameControl game_Control;
         public bool computerMode = false;
-        private bool playmusic = false;
+        private bool playmusic = true;
         public CaroGame()
         {
             InitializeComponent();
@@ -28,6 +28,9 @@ namespace CaroGame
         {
             PlayMusic.Instance.OpenMediaFile(@"..\..\Resources\YieArKungFu-DangCapNhat_3cjcw.mp3");
             PlayMusic.Instance.PlayMediaFile(true);
+            //lbl_Calculating.Text = "";
+            btn_huy.Enabled = false;
+            btn_replay.Enabled = false;
         }
 
 
@@ -35,12 +38,23 @@ namespace CaroGame
         {
             computerMode = false;
             game_Control.VeBanCo(computerMode);
+
+            groupBox1.Enabled = false;
+            btn_PvM.Enabled = false;
+
+            btn_replay.Enabled = true;
+            btn_huy.Enabled = true;
         }
 
         private void btn_PvM_Click(object sender, EventArgs e)
         {
             computerMode = true;
             game_Control.VeBanCo(computerMode);
+
+            groupBox1.Enabled = false;
+            btn_PvP.Enabled = false;
+            btn_replay.Enabled = true;
+            btn_huy.Enabled = true;
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -72,6 +86,14 @@ namespace CaroGame
             if (result == DialogResult.Yes)
             {
                 game_Control.huyVan();
+
+                groupBox1.Enabled = true;
+                btn_PvP.Enabled = true;
+                btn_PvM.Enabled = true;
+
+                btn_huy.Enabled = false;
+                btn_replay.Enabled = false;
+                
             }
         }
 

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace CaroGame
 {
@@ -16,6 +17,8 @@ namespace CaroGame
         private List<Player> players;
         private Player currentPlayer;
         private Oco[,] matrix;
+        private int soNutDaDanh;
+        private bool ComputerFirst = false;
 
         public GameControl(CaroGame form, Panel pnl_BanCo)
         {
@@ -58,7 +61,7 @@ namespace CaroGame
         {
             matrix = new Oco[SoLieu.CHESS_BOARD_ROW, SoLieu.CHESS_BOARD_COLUMN];
 
-            Point temp = new Point(0, 0) ;
+            Point temp = new Point(0, 0);
 
             for (int i = 0; i < SoLieu.CHESS_BOARD_ROW; i++)
             {
@@ -79,15 +82,29 @@ namespace CaroGame
                     matrix[i, j].soCot = j;
                 }
                 temp = new Point(0, temp.Y + SoLieu.CHESS_SIZE);
-                
+
 
             }
             players = initPlayer(computerMode);
+            soNutDaDanh = 0;
+
+            if (ComputerFirst)
+            {
+                MayDanh();
+            }
+           
         }
 
         public void huyVan()
         {
             pnl_BanCo.Controls.Clear();
+
+            form.groupBox1.Enabled = true;
+            form.btn_PvM.Enabled = true;
+            form.btn_PvP.Enabled = true;
+
+           form.btn_huy.Enabled = false;
+           form.btn_replay.Enabled = false;
         }
 
         private void btn_Click(object sender, EventArgs e)
@@ -105,6 +122,7 @@ namespace CaroGame
             String[] vt = btn.Tag.ToString().Split(';');
             int viTriHang = Int32.Parse(vt[0]);
             int viTriCot = Int32.Parse(vt[1]);
+           
 
             //Console.WriteLine("Hang: "+viTriHang+", Cot: "+viTriCot);
 
@@ -120,8 +138,10 @@ namespace CaroGame
             ChangePlayer();
             if (form.computerMode && currentPlayer.IsComputer)
             {
+               
                 MayDanh();
             }
+            soNutDaDanh++;
 
         }
 
@@ -130,12 +150,26 @@ namespace CaroGame
         {
             bool temp = players[1].IsComputer;
             Console.Beep(330, 125);
-            DialogResult result = MessageBox.Show(currentPlayer.Mark + " thắng!, Bạn có muốn chơi lại?", "Xác nhận", MessageBoxButtons.YesNo);
+            DialogResult result = MessageBox.Show(currentPlayer.Mark + " thắng! Bạn có muốn chơi lại?", "Xác nhận", MessageBoxButtons.YesNo);
             huyVan();
             if (result == DialogResult.Yes)
             {
                 VeBanCo(temp);
+                form.groupBox1.Enabled = false;
+                form.btn_huy.Enabled = true;
+                form.btn_replay.Enabled = true;
+                if (temp)
+                {
+                    form.btn_PvP.Enabled = false;
+                }
+                else
+                {
+                    form.btn_PvM.Enabled = false;
+                }
+
+
             }
+            
 
         }
 
@@ -177,7 +211,7 @@ namespace CaroGame
                     break;
                 }
             }
-            return LCount + RCount > 4;
+            return LCount + RCount >= 5;
         }
 
         private bool HangDoc(int i, int j)
@@ -210,7 +244,7 @@ namespace CaroGame
                 }
             }
 
-            return TCount + BCount == 5;
+            return TCount + BCount >= 5;
         }
 
         private bool CheoChinh(int i, int j)
@@ -242,7 +276,7 @@ namespace CaroGame
                 l--;
             }
 
-            return LCount + RCount == 5;
+            return LCount + RCount >= 5;
         }
 
         private bool CheoPhu(int i, int j)
@@ -274,7 +308,7 @@ namespace CaroGame
                 l++;
             }
 
-            return LCount + RCount == 5;
+            return LCount + RCount >= 5;
         }
         #endregion
         private void ChangePlayer()
@@ -301,13 +335,22 @@ namespace CaroGame
                 player1 = new Player(1, "O");
                 player2 = new Player(0, "X");
             }
-            if (computerMode)
-            {
-                player2.IsComputer = true;
-            }
+
             players.Add(player1);
             players.Add(player2);
             currentPlayer = players[0];
+            
+            if (computerMode)
+            {
+                player2.IsComputer = true;
+                Random rd = new Random();
+                ComputerFirst = rd.Next(3, 50) % 2 == 1;
+                if (ComputerFirst)
+                {
+                    currentPlayer = players[1];
+                }
+
+            }
             form.lblLuotDi.Text = currentPlayer.Mark;
             form.lblLuotDi.ForeColor = currentPlayer.Color;
             return players;
@@ -328,6 +371,7 @@ namespace CaroGame
         #endregion
 
 
+        
         //vùng thuật toán AI
         #region AI
         private void MayDanh()
@@ -338,6 +382,11 @@ namespace CaroGame
             int imax = 0;
             int jmax = 0;
 
+            if (soNutDaDanh == 0)
+            {
+                MayQuyetDinhDanh(new Random().Next(5, 10), new Random().Next(7, 12));
+                return;
+            }
             //tính giờ
             Stopwatch st = new Stopwatch();
             st.Reset();
@@ -347,7 +396,7 @@ namespace CaroGame
             {
                 for (int j = 0; j < SoLieu.CHESS_BOARD_COLUMN; j++)
                 {
-                    if (matrix[i, j].SoHuu.Mark == "xxx") //&& !CatTia(matrix[i, j]))
+                    if (matrix[i, j].SoHuu.Mark == "xxx" && !CatTia(matrix[i, j]))
                     {
                         int diemTam;
                         diemTanCong = duyetTCNgang(i, j) + duyetTCDoc(i, j) + duyetTCCheoChinh(i, j) + duyetTCCheoPhu(i, j);
@@ -376,7 +425,7 @@ namespace CaroGame
             Console.WriteLine("time: " + st.ElapsedMilliseconds.ToString());
             // Console.WriteLine("Tan Cong: " + diemTanCong + ", Phong ngu: " + diemPhongNgu);
             MayQuyetDinhDanh(imax, jmax);
-           
+
         }
 
 
@@ -396,8 +445,8 @@ namespace CaroGame
         // private int[] MangDiemPhongNgu = new int[7] { 0, 7, 50 , 350,1750,7860,210000 };
         //private int[] MangDiemTanCong = new int[7] { 0, 3, 24, 243, 2197, 19773, 177957 };
 
-        //private int[] MangDiemTanCong = new int[7] { 0, 3, 24, 192, 1536, 12288, 98304 };
-        //private int[] MangDiemPhongNgu = new int[7] { 0, 1, 9, 81, 729, 6561, 59049 };
+       // private int[] MangDiemTanCong = new int[7] { 0, 3, 24, 192, 1536, 12288, 98304 };
+       // private int[] MangDiemPhongNgu = new int[7] { 0, 1, 9, 81, 729, 6561, 59049 };
 
 
         //các hàm duyệt tấn công

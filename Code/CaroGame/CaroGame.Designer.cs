@@ -207,21 +207,21 @@
             // lawMenuItem
             // 
             this.lawMenuItem.Name = "lawMenuItem";
-            this.lawMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.lawMenuItem.Size = new System.Drawing.Size(143, 22);
             this.lawMenuItem.Text = "Luật Chơi";
             this.lawMenuItem.Click += new System.EventHandler(this.lawMenuItem_Click);
             // 
             // aboutMenuItem
             // 
             this.aboutMenuItem.Name = "aboutMenuItem";
-            this.aboutMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutMenuItem.Size = new System.Drawing.Size(143, 22);
             this.aboutMenuItem.Text = "About";
             this.aboutMenuItem.Click += new System.EventHandler(this.aboutMenuItem_Click);
             // 
             // battatnhacToolStripMenuItem
             // 
             this.battatnhacToolStripMenuItem.Name = "battatnhacToolStripMenuItem";
-            this.battatnhacToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.battatnhacToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.battatnhacToolStripMenuItem.Text = "Bật/Tắt Nhạc";
             this.battatnhacToolStripMenuItem.Click += new System.EventHandler(this.battatnhacToolStripMenuItem_Click);
             // 
@@ -257,22 +257,22 @@
         #endregion
 
         private System.Windows.Forms.Panel pnl_BangDieuKhien;
-        private System.Windows.Forms.Button btn_PvM;
-        private System.Windows.Forms.Button btn_PvP;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem luậtChơiToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem lawMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutMenuItem;
-        private System.Windows.Forms.Button btn_replay;
-        private System.Windows.Forms.Button btn_huy;
         private System.Windows.Forms.ToolStripMenuItem battatnhacToolStripMenuItem;
         public System.Windows.Forms.Panel pnl_BanCo;
         public System.Windows.Forms.GroupBox groupBox1;
         public System.Windows.Forms.RadioButton radioO;
         public System.Windows.Forms.RadioButton radioX;
         public System.Windows.Forms.Label lblLuotDi;
+        public System.Windows.Forms.Button btn_PvM;
+        public System.Windows.Forms.Button btn_PvP;
+        public System.Windows.Forms.Button btn_replay;
+        public System.Windows.Forms.Button btn_huy;
     }
 }
 
