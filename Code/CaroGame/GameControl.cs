@@ -141,7 +141,7 @@ namespace CaroGame
                
                 MayDanh();
             }
-            soNutDaDanh++;
+           
 
         }
 
@@ -316,6 +316,7 @@ namespace CaroGame
             currentPlayer = currentPlayer.Id == players[0].Id ? players[1] : players[0];
             form.lblLuotDi.Text = currentPlayer.Mark;
             form.lblLuotDi.ForeColor = currentPlayer.Color;
+            soNutDaDanh++;   
         }
 
         private List<Player> initPlayer(bool computerMode)
@@ -382,6 +383,9 @@ namespace CaroGame
             int imax = 0;
             int jmax = 0;
 
+            //biến chỉ để in ra màn hình kiểm tra điểm
+            int tempTC = 0, tempPN = 0;
+
             if (soNutDaDanh == 0)
             {
                 MayQuyetDinhDanh(new Random().Next(5, 10), new Random().Next(7, 12));
@@ -416,6 +420,10 @@ namespace CaroGame
                             diemMax = diemTam;
                             imax = i;
                             jmax = j;
+
+                            //biến chỉ để in ra màn hình kiểm tra điểm
+                            tempTC = diemTanCong;
+                            tempPN = diemPhongNgu;
                         }
                     }
                 }
@@ -423,7 +431,8 @@ namespace CaroGame
             }
             st.Stop();
             Console.WriteLine("time: " + st.ElapsedMilliseconds.ToString());
-            // Console.WriteLine("Tan Cong: " + diemTanCong + ", Phong ngu: " + diemPhongNgu);
+            Console.WriteLine("Tan Cong: " + tempTC + ", Phong ngu: " + tempPN);
+            Console.WriteLine("I max: "+imax+", J max: "+jmax+", Diem Max: " +diemMax);
             MayQuyetDinhDanh(imax, jmax);
 
         }
@@ -437,7 +446,7 @@ namespace CaroGame
 
         //mảng điểm tấn công, phòng ngự:
         //root
-        private int[] MangDiemTanCong = new int[7] { 0, 4, 25, 246, 7300, 6561, 59049 };
+        private int[] MangDiemTanCong = new int[7] { 0, 4, 25, 246, 7300, 16561, 59049 };
         private int[] MangDiemPhongNgu = new int[7] { 0, 3, 24, 243, 2197, 19773, 177957 };
 
         //nnc
@@ -518,7 +527,7 @@ namespace CaroGame
             int KhoangChong = 0;
 
             //bên trên
-            for (int dem = 1; dem <= 4 && dongHT > 4; dem++)
+            for (int dem = 1; dem <= 4 && dongHT >= 4; dem++)
             {
                 if (matrix[dongHT - dem, cotHT].SoHuu.Equals(players[1]))
                 {
@@ -1062,7 +1071,7 @@ namespace CaroGame
             //nếu chạy đến đây tức duyệt 2 bên đều không có nước đánh thì cắt tỉa
             return true;
         }
-
+         
         private bool catTiaDoc(Oco oCo)
         {
             //duyệt phía dưới
